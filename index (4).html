@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hager's Birthday ✨</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        #main-stage {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        /* تنسيق النصوص والرسالة الأخيرة */
+        #overlay-text {
+            position: relative;
+            color: #ff69b4;
+            font-weight: bold;
+            text-align: center;
+            z-index: 10;
+            text-shadow: 0 0 20px rgba(255, 105, 180, 0.8);
+            line-height: 1.6;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        /* تنسيق أسطر الرسالة النهائية لجعلها متناسقة */
+       .final-msg-ar {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            direction: rtl;
+            display: block;
+        }
+
+       .final-msg-en {
+            font-size: 1.5rem;
+            color: #ffe4e1; /* لون وردي فاتح جداً ليعطي تناسقاً وتميزاً للسطر الثاني */
+            direction: ltr;
+            display: block;
+        }
+
+        /* تأثير الانفجار الوردي عند الانتقال */
+        #cloud-effect {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background: radial-gradient(circle, #ff69b4 0%, transparent 70%);
+            border-radius: 50%;
+            opacity: 0;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+       .blast-animation {
+            animation: blast 0.8s ease-out forwards;
+        }
+
+        @keyframes blast {
+            0% { transform: scale(1); opacity: 1; filter: blur(5px); }
+            100% { transform: scale(10); opacity: 0; filter: blur(20px); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-stage">
+        <canvas id="matrix-canvas"></canvas>
+
+        <div id="overlay-text">3</div>
+
+        <div id="cloud-effect"></div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
+        const overlay = document.getElementById('overlay-text');
+        const cloud = document.getElementById('cloud-effect');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // إعداد مطر الـ Matrix الوردي المستمر
+        const characters = "HAGER17HAPPYBIRTHDAY27092009";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const rainDrops = Array.from({ length: columns }).fill(1);
+
+        function drawMatrix() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ff69b4';
+            ctx.font = fontSize + 'px monospace';
+
+            rainDrops.forEach((y, i) => {
+                const text = characters.charAt(Math.floor(Math.random() * characters.length));
+                ctx.fillText(text, i * fontSize, y * fontSize);
+                if (y * fontSize > canvas.height && Math.random() > 0.975) rainDrops[i] = 0;
+                rainDrops[i]++;
+            });
+        }
+        // المطر يبدأ ولن يتوقف أبداً حتى أثناء الرسالة الأخيرة
+        const matrixInterval = setInterval(drawMatrix, 30);
+
+        // التسلسل الزمني (كل خطوة ثانيتين)
+        const steps = [
+            { text: "3", time: 2000 },
+            { text: "2", time: 2000 },
+            { text: "1", time: 2000 },
+            { text: "HAPPY BIRTHDAY", time: 2000 },
+            {text: "To", time: 2000 },
+            { text: "Hager", time: 2000 },
+            { text: "27_9_2009", time: 2500},
+            { text: "HAPPY +17 😍", time: 2500 }
+        ];
+
+        let current = 00;
+
+        function triggerBlast() {
+            cloud.classList.remove('blast-animation');
+            void cloud.offsetWidth; // إعادة ضبط الحركة
+            cloud.classList.add('blast-animation');
+        }
+
+        function nextStep() {
+            if (current < steps.length) {
+                overlay.innerText = steps[current].text;
+
+                // ضبط حجم الخط للكلمات ليكون متناسقاً
+                if (steps[current].text.length > 5) overlay.style.fontSize = "2.5.rem";
+                else overlay.style.fontSize = "6rem";
+
+                triggerBlast();
+
+                setTimeout(() => {
+                    current++;
+                    nextStep();
+                }, steps[current].time);
+            } else {
+                // عند انتهاء الخطوات، تظهر الرسالة النهائية داخل الشاشة السوداء والمطر مستمر
+                triggerBlast();
+
+                // إدخال السطرين العربي والإنجليزي بشكل متناسق وبدون أي توقيع إضافي
+                overlay.innerHTML = `
+                    <span class="final-msg-ar">كل سنة وانتي أسعد إنسانة في الدنيا ✨️😍</span>
+                    <span class="final-msg-en">May you be the happiest person in the world every year! ✨️😍</span>
+                `;
+
+                // وقت عرض الرسالة الأخيرة 5 ثوانٍ كما طلبت
+                setTimeout(() => {
+                    console.log("انتهت الـ 5 ثوانٍ الخاصة بالرسالة الأخيرة والمطر ما زال مستمراً");
+                }, 5000);
+            }
+        }
+
+        // بدء التشغيل
+        nextStep();
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
+</body>
+</html>
